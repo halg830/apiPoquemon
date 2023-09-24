@@ -1,15 +1,41 @@
 <script setup>
-import axios from "axios"
-import { ref } from "vue"
+import axios from "axios";
+import { ref } from "vue";
 
-const c = ref(false)
-const poke = ref({})
+const pokemon = defineProps({
+  id: {
+    type: Number,
+  },
+  name: {
+    type: String,
+  },
+  tipos: {
+    type: Array,
+  },
+  altura: {
+    type: String,
+  },
+  peso: {
+    type: String,
+  },
+  imagen: {
+    type: String
+  },
+  estadisticas:{
+    type: Array
+  }
+});
 
-async function obtenerUrlsPokemon() {
-  let r = await axios.get("https://pokeapi.co/api/v2/pokemon?limit=50&offset=0")
+console.log(pokemon);
+
+/* const c = ref(false)
+const pokemon = ref({}) */
+
+/* async function obtenerUrlsPokemon() {
+  // let r = await axios.get("https://pokeapi.co/api/v2/pokemon?limit=50&offset=0")
   const pokemon = await axios.get("https://pokeapi.co/api/v2/pokemon/3/")
   console.log(pokemon)
-  poke.value = {
+  pokemon.value = {
     id: pokemon.data.id,
     imagen: pokemon.data.sprites.other['official-artwork'].front_shiny,
     name: pokemon.data.name,
@@ -22,49 +48,50 @@ async function obtenerUrlsPokemon() {
   }
 
   c.value = true
-}
+} */
 
 const concatenar = (cant) => {
-  let a = 'width: '
-  a += cant
-  a+="%;"
-  return a
-
-}
+  let a = "width: ";
+  a += cant;
+  a += "%;";
+  return a;
+};
 </script>
 
 <template>
   <div>
-    <button @click="obtenerUrlsPokemon()">Cargar</button>
-    <div v-if="c">
+    <!-- <button @click="obtenerUrlsPokemon()">Cargar</button> -->
+    <div>
       <div>
         <div>
-          <h1>#{{ poke.id }}</h1>
-          <h2>{{ poke.name }}</h2>
+          <h1>#{{ pokemon.id }}</h1>
+          <h2>{{ pokemon.name }}</h2>
           <div>
-            <div v-for="(tipo, index) in poke.tipos" :key="index">{{ tipo }}</div>
+            <div v-for="(tipo, index) in pokemon.tipos" :key="index">
+              {{ tipo }}
+            </div>
           </div>
           <div>
             <div>
               <b>Altura</b>
-              <p>{{ poke.altura }}</p>
+              <p>{{ pokemon.altura }}</p>
             </div>
             <div>
               <b>Peso</b>
-              <p>{{ poke.peso }}KG</p>
+              <p>{{ pokemon.peso }}KG</p>
             </div>
           </div>
         </div>
 
-        <img :src="poke.imagen" alt="">
+        <img :src="pokemon.imagen" alt="" />
       </div>
 
       <div>
         <h2>Estadísticas</h2>
         <div>
-          <div v-for="(stat, index) in poke.estadisticas" :key="index">
+          <div v-for="(stat, index) in pokemon.estadisticas" :key="index">
             <p>{{ stat.name }}</p>
-            <div style="width: 100%; height: 20px; background-color: white;">
+            <div style="width: 100%; height: 20px; background-color: white">
               <div :style="concatenar(stat.cant)" class="porcentaje"></div>
             </div>
             <p>{{ stat.cant }}</p>
@@ -76,7 +103,7 @@ const concatenar = (cant) => {
 </template>
 
 <style scoped>
-.porcentaje{
+.porcentaje {
   height: 20px;
   background-color: red;
 }
