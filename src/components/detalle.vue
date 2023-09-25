@@ -28,28 +28,6 @@ const pokemon = defineProps({
 
 console.log(pokemon);
 
-/* const c = ref(false)
-const pokemon = ref({}) */
-
-/* async function obtenerUrlsPokemon() {
-  // let r = await axios.get("https://pokeapi.co/api/v2/pokemon?limit=50&offset=0")
-  const pokemon = await axios.get("https://pokeapi.co/api/v2/pokemon/3/")
-  console.log(pokemon)
-  pokemon.value = {
-    id: pokemon.data.id,
-    imagen: pokemon.data.sprites.other['official-artwork'].front_shiny,
-    name: pokemon.data.name,
-    altura: pokemon.data.height,
-    peso: pokemon.data.weight,
-    estadisticas: pokemon.data.stats.map((e) => {
-      return { name: e.stat.name, cant: e.base_stat }
-    }),
-    tipos: pokemon.data.types.map(e => e.type.name)
-  }
-
-  c.value = true
-} */
-
 const concatenar = (cant) => {
   let a = "width: ";
   a += cant;
@@ -60,15 +38,14 @@ const concatenar = (cant) => {
 
 <template>
   <div>
-    <!-- <button @click="obtenerUrlsPokemon()">Cargar</button> -->
     <div>
       <div>
         <div>
           <h1>#{{ pokemon.id }}</h1>
           <h2>{{ pokemon.name }}</h2>
-          <div>
-            <div v-for="(tipo, index) in pokemon.tipos" :key="index">
-              {{ tipo }}
+          <div class="tipos">
+            <div v-for="(tipo, index) in pokemon.tipos" :key="index" >
+              <p>{{ tipo }}</p> 
             </div>
           </div>
           <div>
@@ -106,5 +83,9 @@ const concatenar = (cant) => {
 .porcentaje {
   height: 20px;
   background-color: red;
+}
+
+.tipos{
+  display: flex;
 }
 </style>

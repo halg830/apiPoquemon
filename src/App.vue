@@ -7,12 +7,20 @@ import imgPokeApi from "./assets/pokeapi.png";
 import imgFiltrar from "./assets/filtrar.png";
 import imgLupa from "./assets/lupa.png";
 
+const componenteBuscar = ref(false)
 const componente = ref(true);
 const pokemones = ref([]);
 const coloresTipo = {
-  grass: "green",
-  poison: "violet",
-  fire: "orange",
+  grass: "#9ccb4f",
+  poison: "#800059",
+  fire: "#ff7404",
+  flying: "#A890F0",
+  water: "#6890F0",
+  bug: "#A8B820",
+  normal: "#A8A878",
+  electric: "#F8D030",
+  ground: "#E0C068",
+  fairy: "#EE99AC"
 };
 
 async function obtenerUrlsPokemon(i) {
@@ -20,7 +28,7 @@ async function obtenerUrlsPokemon(i) {
   console.log(pokemon);
   pokemones.value.push({
     id: pokemon.data.id,
-    imagen: pokemon.data.sprites.other["official-artwork"].front_shiny,
+    imagen: pokemon.data.sprites.other["official-artwork"].front_default,
     name: pokemon.data.name,
     altura: pokemon.data.height,
     peso: pokemon.data.weight,
@@ -41,6 +49,14 @@ function verDetalle(poke) {
   pokemon.value = poke;
   componente.value = !componente.value;
 }
+
+const txtBuscar = ref("")
+const pokemonBuscado = ref({})
+
+function buscar() {
+  pokemonBuscado.value = pokemones.value.find(s => s.name == txtBuscar.value)
+  componenteBuscar.value = true
+}
 </script>
 
 <template>
@@ -54,15 +70,11 @@ function verDetalle(poke) {
             <div id="contBuscar">
               <div id="contCuadroBuscar">
                 <img :src="imgLupa" alt="" />
-                <input
-                  class="form-control me-2"
-                  type="search"
-                  placeholder="Buscar nombre de pokemon"
-                  aria-label="Search"
-                />
+                <input class="form-control me-2" type="search" placeholder="Buscar nombre de pokemon" aria-label="Search"
+                  v-model="txtBuscar" />
               </div>
 
-              <button class="btn btn-outline-success">Search</button>
+              <button class="btn btn-outline-success" @click="buscar()">Search</button>
             </div>
           </div>
         </nav>
@@ -73,23 +85,36 @@ function verDetalle(poke) {
         <h4>Filtrar</h4>
       </button>
 
-      <div
-        v-for="(pokemon, i) in pokemones"
-        :key="i"
-        @click="verDetalle(pokemon)"
-      >
-        <div class="card" style="width: 18rem">
-          <img :src="pokemon.imagen" alt="" />
-          <div class="card-body">
-            <h5 class="card-text">N°{{ pokemon.id }}</h5>
-            <h2 class="card-title">{{ pokemon.name }}</h2>
-            <div>
-              <div
-                v-for="(tipo, i) in pokemon.tipos"
-                :key="i"
-                :style="'background-color: ' + coloresTipo[tipo]"
-              >
-                <p>{{ tipo }}</p>
+      <div v-if="componenteBuscar">
+      <div class="card" style="width: 18rem" @click='verDetalle(pokemonBuscado)'>
+        <img :src="pokemonBuscado.imagen" alt="" />
+        <div class="card-body">
+          <h5 class="card-text">N°{{ pokemonBuscado.id }}</h5>
+          <h2 class="card-title">{{ pokemonBuscado.name }}</h2>
+          <div class="tipos">
+            <div v-for="(tipo, i) in pokemonBuscado.tipos" :key="i" :style="'background-color: ' + coloresTipo[tipo]"
+              class="tipo">
+              <p>{{ tipo }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <div id="contPokemones" v-if="!componenteBuscar">
+        <div v-for="(pokemon, i) in pokemones" :key="i" @click="verDetalle(pokemon)">
+
+
+          <div class="card" style="width: 18rem">
+            <img :src="pokemon.imagen" alt="" />
+            <div class="card-body">
+              <h5 class="card-text">N°{{ pokemon.id }}</h5>
+              <h2 class="card-title">{{ pokemon.name }}</h2>
+              <div class="tipos">
+                <div v-for="(tipo, i) in pokemon.tipos" :key="i" :style="'background-color: ' + coloresTipo[tipo]"
+                  class="tipo">
+                  <p>{{ tipo }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -102,17 +127,13 @@ function verDetalle(poke) {
 </template>
 
 <style scoped>
-#pokemones {
-  padding: 0 5vw;
-}
-
 #contBuscar {
   display: flex;
   margin: 50px 0;
   align-items: center;
 }
 
-#contBuscar > button {
+#contBuscar>button {
   width: 100px;
   height: 40px;
   border-radius: 25px;
@@ -125,13 +146,14 @@ function verDetalle(poke) {
   padding: 5px 15px;
   margin-right: 20px;
   height: 45px;
+  background-color: white;
 }
 
-#contCuadroBuscar > img {
+#contCuadroBuscar>img {
   width: 35px;
 }
 
-#contCuadroBuscar > input {
+#contCuadroBuscar>input {
   width: 25vw;
   border: 0;
 }
@@ -143,14 +165,51 @@ function verDetalle(poke) {
 #btnFiltrar {
   display: flex;
   border: none;
+  background-color: white;
+  align-items: center;
+  padding: 10px;
 }
 
-#btnFiltrar > img {
+#btnFiltrar>img {
   width: 20px;
   margin-right: 5px;
 }
 
-#btnFiltrar > h4 {
+#btnFiltrar>h4 {
   margin: 0;
+  background-color: white;
+}
+
+#contPokemones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 5vw;
+}
+
+.card {
+  height: 450px;
+  margin: 10px;
+  background-color: #f2f2f2;
+}
+
+.card-body {
+  background-color: white;
+}
+
+.tipos {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.tipo {
+  padding: 5px 10px 5px 10px;
+  border-radius: 10px;
+}
+
+.tipo>* {
+  margin: 0;
+  padding: 0;
+  color: white;
 }
 </style>
