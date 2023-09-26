@@ -39,8 +39,8 @@ const concatenar = (cant) => {
 <template>
   <div>
     <div>
-      <div>
-        <div>
+      <div id="header">
+        <div id="contInfo">
           <h1>#{{ pokemon.id }}</h1>
           <h2>{{ pokemon.name }}</h2>
           <div class="tipos">
@@ -48,7 +48,7 @@ const concatenar = (cant) => {
               <p>{{ tipo }}</p> 
             </div>
           </div>
-          <div>
+          <div id="contMedidas">
             <div>
               <b>Altura</b>
               <p>{{ pokemon.altura }}</p>
@@ -63,7 +63,7 @@ const concatenar = (cant) => {
         <img :src="pokemon.imagen" alt="" />
       </div>
 
-      <div>
+      <div id="contEstadisticas">
         <h2>Estadísticas</h2>
         <div>
           <div v-for="(stat, index) in pokemon.estadisticas" :key="index">
@@ -86,6 +86,22 @@ const concatenar = (cant) => {
 }
 
 .tipos{
+  display: flex;
+}
+
+#contInfo{
+  /* display: flex; */
+}
+
+#contMedidas{
+  display: flex;
+}
+
+#header{
+  display: flex;
+}
+
+#contEstadisticas{
   display: flex;
 }
 </style>
