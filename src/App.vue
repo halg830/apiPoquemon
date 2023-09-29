@@ -76,7 +76,26 @@ async function obtenerPokemones(url) {
   };
   console.log(dataPokes);
   console.log(data.value[estado.value].cant);
-  for (
+  dataPokes.data.results.forEach(async(p)=>{
+    const pokemon = await axios.get(p.url);
+    if (
+      data.value[estado.value].data.find((p) => p.id === pokemon.data.id) ===
+      undefined
+    ) {
+      data.value[estado.value].data.push({
+        id: pokemon.data.id,
+        imagen: pokemon.data.sprites.other["official-artwork"].front_default,
+        name: pokemon.data.name,
+        altura: pokemon.data.height,
+        peso: pokemon.data.weight,
+        estadisticas: pokemon.data.stats.map((e) => {
+          return { name: e.stat.name, cant: e.base_stat };
+        }),
+        tipos: pokemon.data.types.map((e) => e.type.name),
+      });
+    }
+  })
+  /* for (
     data.value[estado.value].cant;
     data.value[estado.value].cant <
     data.value[estado.value].limite / filtroTipos.value.length;
@@ -105,7 +124,7 @@ async function obtenerPokemones(url) {
         tipos: pokemon.data.types.map((e) => e.type.name),
       });
     }
-  }
+  } */
 
   console.log("cant3",data.value[estado.value].limite)
 }
