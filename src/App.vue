@@ -59,7 +59,7 @@ const filtroTipos = ref([]);
 const pokemonesFiltrados = ref([]); /////////////////
 
 document.addEventListener("DOMContentLoaded", () => {
-  obtenerPokemones(links.value["pokemones"](50, 0));
+  obtenerPokemones(links.value["pokemones"](data.value[estado.value].limite, data.value[estado.value].cant));
   obtenerTipos();
 });
 
@@ -67,21 +67,24 @@ async function obtenerPokemones(url) {
   if (filtroTipos.value.length <= 0) {
     estado.value = "pokemones";
   } else estado.value = "filtro";
-
+ 
+  console.log("p2", links.value[estado.value](data.value[estado.value].limite, data.value[estado.value].cant))
   const dataPokes = await axios.get(url);
   const axiosGet = {
     pokemones: (i) => dataPokes.data.results?.[i]?.url,
     filtro: (i) => dataPokes.data.pokemon[i].pokemon.url,
   };
   console.log(dataPokes);
-
+  console.log(data.value[estado.value].cant);
   for (
     data.value[estado.value].cant;
     data.value[estado.value].cant <
     data.value[estado.value].limite / filtroTipos.value.length;
     data.value[estado.value].cant++
   ) {
+    
     let i = data.value[estado.value].cant;
+    console.log("i",axiosGet[estado.value](i))
     if (!axiosGet.pokemones(i) && estado.value == "pokemones") break
     const pokemon = await axios.get(axiosGet[estado.value](i));
     i++;
@@ -103,6 +106,8 @@ async function obtenerPokemones(url) {
       });
     }
   }
+
+  console.log("cant3",data.value[estado.value].limite)
 }
 
 const dataBuscar = ref({
@@ -130,8 +135,10 @@ async function buscar() {
 }
 
 async function mostrarMas(){
-  links.value[estado.value](i)
-  obtenerPokemones(links.value[estado.value])
+  data.value[estado.value].limite+=50
+  console.log("cant",data.value[estado.value].cant)
+  console.log("p", links.value[estado.value](data.value[estado.value].limite, data.value[estado.value].cant))
+  obtenerPokemones(links.value[estado.value](data.value[estado.value].limite, data.value[estado.value].cant))
 }
 
 async function filtrar() {
