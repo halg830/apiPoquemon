@@ -28,9 +28,10 @@ const data = ref({
   },
 });
 const links = ref({
-  pokemones: (l, o)=>`https://pokeapi.co/api/v2/pokemon?limit=${l}&offset=${o}`,
-  filtro: `https://pokeapi.co/api/v2/type`,
-  nombrePokemon: "https://pokeapi.co/api/v2/pokemon"
+  pokemones: (l, o) =>
+    `https://pokeapi.co/api/v2/pokemon?limit=${l}&offset=${o}`,
+  filtro: () => `https://pokeapi.co/api/v2/type`,
+  nombrePokemon: "https://pokeapi.co/api/v2/pokemon",
 });
 
 const coloresTipo = {
@@ -59,7 +60,12 @@ const filtroTipos = ref([]);
 const pokemonesFiltrados = ref([]); /////////////////
 
 document.addEventListener("DOMContentLoaded", () => {
-  obtenerPokemones(links.value["pokemones"](data.value[estado.value].limite, data.value[estado.value].cant));
+  obtenerPokemones(
+    links.value["pokemones"](
+      data.value[estado.value].limite,
+      data.value[estado.value].cant
+    )
+  );
   obtenerTipos();
 });
 
@@ -67,46 +73,41 @@ async function obtenerPokemones(url) {
   if (filtroTipos.value.length <= 0) {
     estado.value = "pokemones";
   } else estado.value = "filtro";
- 
-  console.log("p2", links.value[estado.value](data.value[estado.value].limite, data.value[estado.value].cant))
+
+  console.log(
+    "p2",
+    links.value[estado.value](
+      data.value[estado.value].limite,
+      data.value[estado.value].cant
+    )
+  );
   const dataPokes = await axios.get(url);
   const axiosGet = {
-    pokemones: (i) => dataPokes.data.results?.[i]?.url,
-    filtro: (i) => dataPokes.data.pokemon[i].pokemon.url,
+    pokemones: dataPokes.data.results,
+    filtro: dataPokes.data.pokemon,
   };
   console.log(dataPokes);
   console.log(data.value[estado.value].cant);
-  dataPokes.data.results.forEach(async(p)=>{
-    const pokemon = await axios.get(p.url);
-    if (
-      data.value[estado.value].data.find((p) => p.id === pokemon.data.id) ===
-      undefined
-    ) {
-      data.value[estado.value].data.push({
-        id: pokemon.data.id,
-        imagen: pokemon.data.sprites.other["official-artwork"].front_default,
-        name: pokemon.data.name,
-        altura: pokemon.data.height,
-        peso: pokemon.data.weight,
-        estadisticas: pokemon.data.stats.map((e) => {
-          return { name: e.stat.name, cant: e.base_stat };
-        }),
-        tipos: pokemon.data.types.map((e) => e.type.name),
-      });
+
+  console.log(axiosGet[estado.value]);
+
+  const promesas = [];
+  axiosGet[estado.value].forEach(async (p) => {
+    const urlAxios = {
+      pokemones: p.url,
+      filtro: p.pokemon?.url
+    };
+    promesas.push(axios.get(urlAxios[estado.value]));
+  });
+
+  const resultados = await Promise.all(promesas);
+
+  for(const [i, pokemon] of resultados.entries() ){
+    const divisor = filtroTipos.value.length>0 || !filtroTipos.value%2==0 ? filtroTipos.value.length : filtroTipos.value.length+1
+    console.log("d", data.value[estado.value].limite/divisor);
+    if(i>=(data.value[estado.value].limite/divisor)){
+      break
     }
-  })
-  /* for (
-    data.value[estado.value].cant;
-    data.value[estado.value].cant <
-    data.value[estado.value].limite / filtroTipos.value.length;
-    data.value[estado.value].cant++
-  ) {
-    
-    let i = data.value[estado.value].cant;
-    console.log("i",axiosGet[estado.value](i))
-    if (!axiosGet.pokemones(i) && estado.value == "pokemones") break
-    const pokemon = await axios.get(axiosGet[estado.value](i));
-    i++;
 
     if (
       data.value[estado.value].data.find((p) => p.id === pokemon.data.id) ===
@@ -124,20 +125,29 @@ async function obtenerPokemones(url) {
         tipos: pokemon.data.types.map((e) => e.type.name),
       });
     }
-  } */
+  };
 
-  console.log("cant3",data.value[estado.value].limite)
+  console.log("cant3", data.value[estado.value].limite);
 }
 
 const dataBuscar = ref({
   txtBuscar: "",
-  
-})
-const pokemonBuscado= ref({})
+});
+const pokemonBuscado = ref({});
 
 async function buscar() {
-  const pokemon = await axios.get(links.value.nombrePokemon + "/" + dataBuscar.value.txtBuscar)
-  if (!pokemon) { console.log("no encontrado"); return }
+  if(dataBuscar.value.txtBuscar===""){
+    componenteBuscar.value = false
+    return
+  }
+
+  const pokemon = await axios.get(
+    links.value.nombrePokemon + "/" + dataBuscar.value.txtBuscar
+  );
+  if (!pokemon) {
+    console.log("no encontrado");
+    return;
+  }
 
   pokemonBuscado.value = {
     id: pokemon.data.id,
@@ -149,15 +159,26 @@ async function buscar() {
       return { name: e.stat.name, cant: e.base_stat };
     }),
     tipos: pokemon.data.types.map((e) => e.type.name),
-  }
-  componenteBuscar.value = true
+  };
+  componenteBuscar.value = true;
 }
 
-async function mostrarMas(){
-  data.value[estado.value].limite+=50
-  console.log("cant",data.value[estado.value].cant)
-  console.log("p", links.value[estado.value](data.value[estado.value].limite, data.value[estado.value].cant))
-  obtenerPokemones(links.value[estado.value](data.value[estado.value].limite, data.value[estado.value].cant))
+async function mostrarMas() {
+  data.value[estado.value].limite += 50;
+  console.log("cant", data.value[estado.value].cant);
+  console.log(
+    "p",
+    links.value[estado.value](
+      data.value[estado.value].limite,
+      data.value[estado.value].cant
+    )
+  );
+  obtenerPokemones(
+    links.value[estado.value](
+      data.value[estado.value].limite,
+      data.value[estado.value].cant
+    )
+  );
 }
 
 async function filtrar() {
@@ -167,12 +188,12 @@ async function filtrar() {
   });
 }
 
-const desactivarInput=ref()
+const desactivarInput = ref();
 function quitarFiltros() {
-  filtroTipos.value = []
+  filtroTipos.value = [];
   if (filtroTipos.value.length <= 0) estado.value = "pokemones";
 
-  desactivarInput.value=false
+  desactivarInput.value = false;
 }
 
 async function obtenerUrlsPokemon(i) {
@@ -209,7 +230,6 @@ function verDetalle(poke) {
   pokemon.value = poke;
   componente.value = !componente.value;
 }
-
 
 /* function filtrar() {
   arrFunciones.value["pokemones"].forEach((p, i) => {
@@ -276,20 +296,32 @@ async function filtrarTipos(url) {
             <div id="contBuscar">
               <div id="contCuadroBuscar">
                 <img :src="imgLupa" alt="" />
-                <input class="form-control me-2" type="search" placeholder="Buscar nombre de pokemon" aria-label="Search"
-                  v-model="dataBuscar.txtBuscar" @keyup.enter="buscar()"/>
+                <input
+                  class="form-control me-2"
+                  type="search"
+                  placeholder="Buscar nombre de pokemon"
+                  aria-label="Search"
+                  v-model="dataBuscar.txtBuscar"
+                  @keyup.enter="buscar()"
+                  @change="buscar()"
+                />
               </div>
 
               <button class="btn btn-outline-success" @click="buscar()">
-                Search
+                Buscar
               </button>
             </div>
           </div>
         </nav>
       </div>
 
-      <button id="btnFiltrar" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false"
-        aria-controls="collapseExample">
+      <button
+        id="btnFiltrar"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseExample"
+        aria-expanded="false"
+        aria-controls="collapseExample"
+      >
         <img :src="imgFiltrar" alt="" />
         <h4>Filtrar</h4>
       </button>
@@ -297,24 +329,41 @@ async function filtrarTipos(url) {
       <div class="collapse" id="collapseExample">
         <div class="card card-body" id="contFiltros">
           <div v-for="(t, i) in tipos" :key="i">
-            <label for="" class="tipoCheckbox"><input type="checkbox" v-model="filtroTipos" :value="t.url"
-                class="inputCheckbox" :checked="desactivarInput"/>
-              {{ t.name }}</label>
+            <label for="" class="tipoCheckbox"
+              ><input
+                type="checkbox"
+                v-model="filtroTipos"
+                :value="t.url"
+                class="inputCheckbox"
+                :checked="desactivarInput"
+              />
+              {{ t.name }}</label
+            >
           </div>
         </div>
         <button @click="filtrar()">Filtrar</button>
-        <button v-if="filtroTipos.length > 0" @click="quitarFiltros()">Quitar filtros</button>
+        <button v-if="filtroTipos.length > 0" @click="quitarFiltros()">
+          Quitar filtros
+        </button>
       </div>
 
       <div v-if="componenteBuscar">
-        <div class="card" style="width: 18rem" @click="verDetalle(pokemonBuscado)">
+        <div
+          class="card"
+          style="width: 18rem"
+          @click="verDetalle(pokemonBuscado)"
+        >
           <img :src="pokemonBuscado.imagen" alt="" />
           <div class="card-body">
             <h5 class="card-text">N°{{ pokemonBuscado.id }}</h5>
             <h2 class="card-title">{{ pokemonBuscado.name }}</h2>
             <div class="tipos">
-              <div v-for="(tipo, i) in pokemonBuscado.tipos" :key="i" :style="'background-color: ' + coloresTipo[tipo]"
-                class="tipo">
+              <div
+                v-for="(tipo, i) in pokemonBuscado.tipos"
+                :key="i"
+                :style="'background-color: ' + coloresTipo[tipo]"
+                class="tipo"
+              >
                 <p>{{ tipo }}</p>
               </div>
             </div>
@@ -324,15 +373,23 @@ async function filtrarTipos(url) {
 
       <div v-if="!componenteBuscar">
         <div id="contPokemones">
-          <div v-for="(pokemon, i) in data[estado].data" :key="i" @click="verDetalle(pokemon)">
+          <div
+            v-for="(pokemon, i) in data[estado].data"
+            :key="i"
+            @click="verDetalle(pokemon)"
+          >
             <div class="card tarjetas" style="width: 18rem">
               <img :src="pokemon.imagen" alt="" />
               <div class="card-body">
                 <h5 class="card-text">N°{{ pokemon.id }}</h5>
                 <h2 class="card-title">{{ pokemon.name }}</h2>
                 <div class="tipos">
-                  <div v-for="(tipo, i) in pokemon.tipos" :key="i" :style="'background-color: ' + coloresTipo[tipo]"
-                    class="tipo">
+                  <div
+                    v-for="(tipo, i) in pokemon.tipos"
+                    :key="i"
+                    :style="'background-color: ' + coloresTipo[tipo]"
+                    class="tipo"
+                  >
                     <p>{{ tipo }}</p>
                   </div>
                 </div>
@@ -356,7 +413,7 @@ async function filtrarTipos(url) {
   align-items: center;
 }
 
-#contBuscar>button {
+#contBuscar > button {
   width: 100px;
   height: 40px;
   border-radius: 25px;
@@ -372,11 +429,11 @@ async function filtrarTipos(url) {
   background-color: white;
 }
 
-#contCuadroBuscar>img {
+#contCuadroBuscar > img {
   width: 35px;
 }
 
-#contCuadroBuscar>input {
+#contCuadroBuscar > input {
   width: 25vw;
   border: 0;
 }
@@ -393,12 +450,12 @@ async function filtrarTipos(url) {
   padding: 10px;
 }
 
-#btnFiltrar>img {
+#btnFiltrar > img {
   width: 20px;
   margin-right: 5px;
 }
 
-#btnFiltrar>h4 {
+#btnFiltrar > h4 {
   margin: 0;
   background-color: white;
 }
@@ -425,16 +482,9 @@ async function filtrarTipos(url) {
   justify-content: space-evenly;
 }
 
-.tipo {
-  padding: 5px 10px 5px 10px;
-  border-radius: 10px;
-}
 
-.tipo>* {
-  margin: 0;
-  padding: 0;
-  color: white;
-}
+
+
 
 #contFiltros {
   display: flex;
