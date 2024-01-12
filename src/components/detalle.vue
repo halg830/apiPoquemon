@@ -1,6 +1,8 @@
 <script setup>
 import axios from "axios";
 import { ref } from "vue";
+import App from '../App.vue'
+import iconCerrar from '../assets/cerrar.png'
 
 const coloresTipo = {
   normal: "#A8A878",
@@ -91,11 +93,14 @@ const colorBarraProgreso = (cant)=>{
 function primeraLetraMayuscula(cadena) {
   return cadena.charAt(0).toUpperCase() + cadena.slice(1);
 }
+
+const componente = ref(true)
 </script>
 
 <template>
   <div>
-    <div id="bodyDetalle">
+    <div id="bodyDetalle" v-if="componente">
+      <img :src="iconCerrar" alt="Cerrar" id="iconCerrar" @click="componente=false">
       <div id="header">
         <div id="contInfo">
           <h1>#{{ pokemon.id }}</h1>
@@ -135,10 +140,19 @@ function primeraLetraMayuscula(cadena) {
         </div>
       </div>
     </div>
+    <App v-else></App>
   </div>
 </template>
 
 <style scoped>
+
+#iconCerrar{
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
 .porcentaje {
   height: 20px;
   background-color: red;
