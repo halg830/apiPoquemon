@@ -322,8 +322,8 @@ async function filtrarTipos(url) {
               {{ t.name }}</label>
           </div>
         </div>
-        <button @click="filtrar()">Filtrar</button>
-        <button v-if="filtroTipos.length > 0" @click="quitarFiltros()">
+        <button @click="filtrar()" class="btn btn-outline-secondary">Filtrar</button>
+        <button v-if="filtroTipos.length > 0" @click="quitarFiltros()" class="btn btn-outline-warning">
           Quitar filtros
         </button>
       </div>
@@ -363,7 +363,9 @@ async function filtrarTipos(url) {
           </div>
         </div>
 
-        <button @click="mostrarMas()">Mostrar más</button>
+        <div id="btnMostrarMas">
+          <button @click="mostrarMas()" class="btn btn-outline-secondary" >Mostrar más</button>
+        </div>
       </div>
     </div>
 
@@ -372,6 +374,13 @@ async function filtrarTipos(url) {
 </template>
 
 <style scoped>
+#btnMostrarMas{
+  width:100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
 #contBuscar {
   display: flex;
   margin: 50px 0;
@@ -454,6 +463,7 @@ async function filtrarTipos(url) {
 #contFiltros {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .tipoCheckbox {
